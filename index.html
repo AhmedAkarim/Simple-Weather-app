@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 min-h-screen p-4">
+
+    <div class="max-w-2xl mx-auto mt-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-bold text-white mb-2">
+                <i class="fas fa-cloud-sun mr-3"></i>Weather App
+            </h1>
+            <p class="text-blue-100 text-lg">Get real-time weather data for any city</p>
+        </div>
+
+        <!-- Search Box -->
+        <div class="bg-white rounded-2xl shadow-2xl p-6 mb-6">
+            <div class="flex gap-3">
+                <input 
+                    type="text" 
+                    id="cityInput" 
+                    placeholder="Enter city name..." 
+                    class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 text-gray-700 text-lg"
+                >
+                <button 
+                    id="searchBtn" 
+                    class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold text-lg shadow-md hover:shadow-lg">
+                    <i class="fas fa-search mr-2"></i>Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading State (Hidden by default - show with JS) -->
+        <div id="loading" class="bg-white rounded-2xl shadow-2xl p-12 text-center hidden">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mb-4"></div>
+            <p class="text-gray-600 text-lg font-medium">Fetching weather data...</p>
+        </div>
+
+        <!-- Error Message (Hidden by default - show with JS) -->
+        <div id="error" class="bg-red-50 border-2 border-red-200 rounded-2xl shadow-lg p-6 hidden">
+            <div class="flex items-center gap-3 text-red-600">
+                <i class="fas fa-exclamation-circle text-3xl"></i>
+                <div>
+                    <h3 class="font-bold text-lg errorHeading">City not found!</h3>
+                    <p id="errorMessage" class="text-red-500">Please check the city name and try again.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Display (Hidden by default - show with JS when data loads) -->
+        <div id="weatherDisplay" class="hidden">
+            <!-- Main Weather Card -->
+            <div class="bg-white rounded-2xl shadow-2xl p-8 mb-6">
+                <!-- City Name and Date -->
+                <div class="text-center mb-6">
+                    <h2 id="cityName" class="text-4xl font-bold text-gray-800 mb-2">
+                        <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                        City Name
+                    </h2>
+                    <p id="dateTime" class="text-gray-500 text-lg">Date & Time</p>
+                </div>
+
+                <!-- Main Temperature Display -->
+                <div class="flex items-center justify-center gap-8 mb-6 flex-wrap">
+                    <div class="text-center">
+                        <i id="weatherIcon" class="fas fa-cloud-sun text-8xl text-yellow-400 mb-4"></i>
+                        <p id="weatherDescription" class="text-2xl text-gray-600 font-medium capitalize">Weather Description</p>
+                    </div>
+                    <div class="text-center">
+                        <div id="temperature" class="text-7xl font-bold text-gray-800">--°</div>
+                        <p class="text-gray-500 text-lg mt-2">Temperature</p>
+                    </div>
+                </div>
+
+                <!-- Feels Like & Min/Max -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-blue-50 rounded-xl p-4 text-center">
+                        <i class="fas fa-temperature-half text-2xl text-blue-500 mb-2"></i>
+                        <p class="text-gray-500 text-sm">Feels Like</p>
+                        <p id="feelsLike" class="text-2xl font-bold text-gray-800">--°</p>
+                    </div>
+                    <div class="bg-red-50 rounded-xl p-4 text-center">
+                        <i class="fas fa-temperature-high text-2xl text-red-500 mb-2"></i>
+                        <p class="text-gray-500 text-sm">Max Temp</p>
+                        <p id="tempMax" class="text-2xl font-bold text-gray-800">--°</p>
+                    </div>
+                    <div class="bg-cyan-50 rounded-xl p-4 text-center">
+                        <i class="fas fa-temperature-low text-2xl text-cyan-500 mb-2"></i>
+                        <p class="text-gray-500 text-sm">Min Temp</p>
+                        <p id="tempMin" class="text-2xl font-bold text-gray-800">--°</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Details Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <!-- Humidity -->
+                <div class="bg-white rounded-xl shadow-lg p-5">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-droplet text-2xl text-blue-400"></i>
+                        <h3 class="font-semibold text-gray-700">Humidity</h3>
+                    </div>
+                    <p id="humidity" class="text-3xl font-bold text-gray-800">--%</p>
+                </div>
+
+                <!-- Wind Speed -->
+                <div class="bg-white rounded-xl shadow-lg p-5">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-wind text-2xl text-green-400"></i>
+                        <h3 class="font-semibold text-gray-700">Wind Speed</h3>
+                    </div>
+                    <p id="windSpeed" class="text-3xl font-bold text-gray-800">-- m/s</p>
+                </div>
+
+                <!-- Pressure -->
+                <div class="bg-white rounded-xl shadow-lg p-5">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-gauge-high text-2xl text-purple-400"></i>
+                        <h3 class="font-semibold text-gray-700">Pressure</h3>
+                    </div>
+                    <p id="pressure" class="text-3xl font-bold text-gray-800">-- hPa</p>
+                </div>
+
+                <!-- Visibility -->
+                <div class="bg-white rounded-xl shadow-lg p-5">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-eye text-2xl text-indigo-400"></i>
+                        <h3 class="font-semibold text-gray-700">Visibility</h3>
+                    </div>
+                    <p id="visibility" class="text-3xl font-bold text-gray-800">-- km</p>
+                </div>
+
+                <!-- Cloudiness -->
+                <div class="bg-white rounded-xl shadow-lg p-5">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-cloud text-2xl text-gray-400"></i>
+                        <h3 class="font-semibold text-gray-700">Cloudiness</h3>
+                    </div>
+                    <p id="cloudiness" class="text-3xl font-bold text-gray-800">--%</p>
+                </div>
+
+                <!-- Sunrise & Sunset -->
+                <div class="bg-white rounded-xl shadow-lg p-5">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="fas fa-sun text-2xl text-orange-400"></i>
+                        <h3 class="font-semibold text-gray-700">Sun</h3>
+                    </div>
+                    <p class="text-sm text-gray-600">Rise: <span id="sunrise" class="font-bold">--:--</span></p>
+                    <p class="text-sm text-gray-600">Set: <span id="sunset" class="font-bold">--:--</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+    YOUR JAVASCRIPT GOES HERE!
+    
+    Tips for implementation:
+    1. Get your API key from OpenWeatherMap (https://openweathermap.org/api)
+    2. Add event listener to the search button
+    3. Show loading state when fetch starts
+    4. Use fetch() with: https://api.openweathermap.org/data/2.5/weather?q={city}&appid={apiKey}&units=metric
+    5. Check response.ok, then parse with response.json()
+    6. Hide loading, populate the data into the elements by ID
+    7. Handle errors in catch block - show error div
+    8. Remember to hide/show appropriate divs based on state!
+    
+    Element IDs you'll need to populate:
+    - cityName, dateTime, temperature, weatherDescription
+    - feelsLike, tempMax, tempMin
+    - humidity, windSpeed, pressure, visibility, cloudiness
+    - sunrise, sunset, weatherIcon
+    -->
+
+<script src="script.js"></script>
+</body>
+</html>
